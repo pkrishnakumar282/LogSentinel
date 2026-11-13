@@ -1,0 +1,21 @@
+# Optional one-shot job, not part of normal startup.
+services:
+  ml-training:
+    profiles: [training]
+    build:
+      context: .
+      dockerfile: services/ml-training/Dockerfile
+    restart: 'no'
+    networks: [backend]
+    mem_limit: 2g
+    cpus: 2.0
+    security_opt: [no-new-privileges:true]
+    environment:
+      RANDOM_SEED: ${RANDOM_SEED:-42}
+      FEATURE_WINDOW_SECONDS: ${FEATURE_WINDOW_SECONDS:-60}
+    volumes:
+      - ./ml/datasets:/data:ro
+      - training-artifacts:/artifacts
+    command: [train, --dataset, /data/synthetic-phase3.jsonl, --output, /artifacts]
+volumes:
+  training-artifacts:

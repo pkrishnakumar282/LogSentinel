@@ -1,0 +1,93 @@
+# Combine with base, ingestion, mlflow, inference and streams overlays.
+x-db: &db
+  PIPELINE_DB_BACKEND: postgres
+  POSTGRES_HOST: postgres
+  POSTGRES_DB: ${POSTGRES_DB:-logsentinel}
+  POSTGRES_USER: ${POSTGRES_USER:-logsentinel}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+services:
+  inference-worker:
+    depends_on:
+      log-archive:
+        condition: service_healthy
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    restart: unless-stopped
+    networks: [backend]
+    ports: ['127.0.0.1:${GATEWAY_PORT:-8000}:8000']
+    mem_limit: 768m
+    cpus: 1.0
+    security_opt: [no-new-privileges:true]
+    environment:
+      <<: *db
+      GATEWAY_API_TOKEN: ${GATEWAY_API_TOKEN:?Set GATEWAY_API_TOKEN to at least 24 random characters}
+      GATEWAY_CORS_ORIGINS: ${GATEWAY_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      GATEWAY_MAX_BODY_BYTES: ${GATEWAY_MAX_BODY_BYTES:-1048576}
+      GATEWAY_RATE_PER_MINUTE: ${GATEWAY_RATE_PER_MINUTE:-600}
+      GATEWAY_TIMEOUT_SECONDS: ${GATEWAY_TIMEOUT_SECONDS:-10}
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:-}
+      INGEST_TOKEN: ${INGEST_TOKEN:?Set INGEST_TOKEN}
+      INFERENCE_API_TOKEN: ${INFERENCE_API_TOKEN:?Set INFERENCE_API_TOKEN}
+      ALERT_API_TOKEN: ${ALERT_API_TOKEN:?Set ALERT_API_TOKEN}
+      PROCESSOR_URL: http://log-processor:8012
+      INFERENCE_URL: http://ml-inference:8013
+      ALERT_MANAGER_URL: http://alert-manager:8014
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+      NORMALIZED_STREAM: ${NORMALIZED_STREAM:-logs:normalized:v1}
+      PREDICTION_STREAM: ${PREDICTION_STREAM:-logs:predictions:v1}
+      DEAD_LETTER_STREAM: ${DEAD_LETTER_STREAM:-logs:failed:v1}
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+  log-archive:
+    build:
+      context: .
+      dockerfile: services/alert-manager/Dockerfile
+    entrypoint: [python, -m, shared.application.archive]
+    restart: unless-stopped
+    networks: [backend]
+    mem_limit: 512m
+    cpus: 1.0
+    security_opt: [no-new-privileges:true]
+    environment:
+      <<: *db
+      REDIS_HOST: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+      NORMALIZED_STREAM: ${NORMALIZED_STREAM:-logs:normalized:v1}
+      ARCHIVE_CONSUMER_GROUP: ${ARCHIVE_CONSUMER_GROUP:-archive-v1}
+      WORKER_HEARTBEAT_PATH: /state/archive-health.json
+    healthcheck:
+      test: [CMD, python, -c, "from shared.pipeline.runtime import healthy; raise SystemExit(0 if healthy('/state/archive-health.json') else 1)"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+  training-job:
+    profiles: [training-job]
+    build:
+      context: .
+      dockerfile: infrastructure/docker/training-worker.Dockerfile
+    restart: 'no'
+    networks: [backend]
+    mem_limit: 2g
+    cpus: 2.0
+    security_opt: [no-new-privileges:true]
+    environment:
+      <<: *db
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes: [training-jobs:/jobs]
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+      mlflow:
+        condition: service_healthy
+volumes:
+  training-jobs:

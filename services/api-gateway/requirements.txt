@@ -1,0 +1,7 @@
+-r ../../infrastructure/docker/requirements-pipeline.txt
+fastapi==0.162.1
+pydantic==2.14.3
+uvicorn==0.54.0
+httpx==0.28.1
+# Read-only tracking/registry metadata client; no training service import.
+mlflow-skinny==3.18.0

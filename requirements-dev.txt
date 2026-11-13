@@ -1,0 +1,9 @@
+-r services/log-processor/requirements.txt
+httpx==0.28.1
+pytest==9.0.2
+ruff==0.14.5
+-r services/ml-training/requirements-mlflow.txt
+-r services/ml-inference/requirements.txt
+-r services/alert-manager/requirements.txt
+-r services/api-gateway/requirements.txt
+-r services/ml-training/requirements-worker.txt

@@ -1,0 +1,2 @@
+192.0.2.10 - demo [01/Jan/2026:00:00:01 +0000] "GET /health HTTP/1.1" 200 12 "-" "synthetic-agent"
+192.0.2.10 - demo [01/Jan/2026:00:00:02 +0000] "GET /api/items?token=fixture-secret HTTP/1.1" 503 32 "-" "synthetic-agent"

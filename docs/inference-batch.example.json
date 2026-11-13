@@ -1,0 +1,21 @@
+{
+  "context_id": "synthetic-batch",
+  "events": [
+    {
+      "event_id": "ea86e8b2-876a-41e8-8684-389f3cb450b2",
+      "timestamp": "2026-01-01T00:00:00Z",
+      "source": "application", "service": "demo-api", "hostname": "synthetic-host",
+      "severity": "INFO", "message": "scheduled task completed in 15 ms",
+      "template": "scheduled task completed in <NUM> ms", "status_code": null,
+      "metadata": {"synthetic": true}
+    },
+    {
+      "event_id": "ab5e61fa-82d3-4746-957c-fe71556e923f",
+      "timestamp": "2026-01-01T00:00:01Z",
+      "source": "nginx", "service": "nginx", "hostname": "synthetic-host",
+      "severity": "ERROR", "message": "GET /api/items status=503",
+      "template": "GET /api/items status=<NUM>", "status_code": 503,
+      "metadata": {"synthetic": true}
+    }
+  ]
+}

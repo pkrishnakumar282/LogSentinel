@@ -1,0 +1,11 @@
+{
+  "scope": "development",
+  "min_test_records": 80,
+  "min_positives": 5,
+  "min_negatives": 50,
+  "min_precision": 0.7,
+  "min_recall": 0.7,
+  "min_f1": 0.7,
+  "max_false_positive_rate": 0.05,
+  "max_batch_ms_per_event": 100.0
+}

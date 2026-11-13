@@ -1,0 +1,15 @@
+# Optional tracking server; normal base infrastructure stays unchanged.
+services:
+  mlflow:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/mlflow.Dockerfile
+    restart: unless-stopped
+    networks: [backend]
+    mem_limit: 1536m
+    cpus: 1.0
+    security_opt: [no-new-privileges:true]
+    ports: ['127.0.0.1:${MLFLOW_PORT:-5000}:5000']
+    volumes: [mlflow-data:/mlflow]
+volumes:
+  mlflow-data:

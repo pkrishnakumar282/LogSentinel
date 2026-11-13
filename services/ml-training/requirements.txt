@@ -1,0 +1,13 @@
+# Validated offline on Python 3.14; Python 3.12 dependency execution remains a deployment gate.
+numpy==2.5.4
+pandas==2.3.3
+scipy==1.18.1
+scikit-learn==1.9.1
+joblib==1.6.0
+threadpoolctl==3.8.0
+narwhals==2.28.0
+cloudpickle==3.1.2
+python-dateutil==2.9.0.post0
+pytz==2026.6
+tzdata==2026.6
+six==1.17.0

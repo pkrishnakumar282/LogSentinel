@@ -1,0 +1,47 @@
+# Optional Phase 2 services. Use together with docker-compose.yml.
+services:
+  log-processor:
+    build:
+      context: .
+      dockerfile: services/log-processor/Dockerfile
+    restart: unless-stopped
+    networks: [backend]
+    mem_limit: 512m
+    cpus: 1.0
+    security_opt: [no-new-privileges:true]
+    environment:
+      INGEST_TOKEN: ${INGEST_TOKEN:?Set INGEST_TOKEN to at least 24 random characters}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+      NORMALIZED_STREAM: ${NORMALIZED_STREAM:-logs:normalized:v1}
+      STREAM_MAX_LENGTH: ${STREAM_MAX_LENGTH:-100000}
+      DEDUP_TTL_SECONDS: ${DEDUP_TTL_SECONDS:-604800}
+      PROCESSOR_RATE_PER_MINUTE: ${PROCESSOR_RATE_PER_MINUTE:-6000}
+      LOG_TIMEZONE: ${LOG_TIMEZONE:-UTC}
+      TEMPLATE_MODE: drain3
+    ports: ['127.0.0.1:${PROCESSOR_PORT:-8012}:8012']
+    depends_on:
+      redis:
+        condition: service_healthy
+  log-collector:
+    build:
+      context: .
+      dockerfile: services/log-collector/Dockerfile
+    restart: unless-stopped
+    networks: [backend]
+    mem_limit: 256m
+    cpus: 0.5
+    security_opt: [no-new-privileges:true]
+    environment:
+      INGEST_TOKEN: ${INGEST_TOKEN:?Set INGEST_TOKEN to at least 24 random characters}
+      PROCESSOR_URL: http://log-processor:8012/api/v1/ingest
+    volumes:
+      - collector-state:/data
+      - ./docs/collector.example.json:/config/collector.json:ro
+      - ./tests/fixtures:/app/tests/fixtures:ro
+    depends_on:
+      log-processor:
+        condition: service_healthy
+volumes:
+  collector-state:

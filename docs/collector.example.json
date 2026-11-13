@@ -1,0 +1,11 @@
+{
+  "hostname": "synthetic-host",
+  "poll_seconds": 2,
+  "files": [
+    {"path": "tests/fixtures/nginx-access.txt", "source": "nginx", "service": "nginx", "synthetic": true},
+    {"path": "tests/fixtures/nginx-error.txt", "source": "nginx", "service": "nginx", "synthetic": true},
+    {"path": "tests/fixtures/application.txt", "source": "application", "service": "demo-api", "synthetic": true},
+    {"path": "tests/fixtures/journal.jsonl", "source": "linux", "service": "journal", "synthetic": true}
+  ],
+  "journal": {"enabled": false, "units": []}
+}

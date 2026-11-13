@@ -1,0 +1,6 @@
+# Explicit localhost ports for host integration tests; never part of default startup.
+services:
+  redis:
+    ports: ['127.0.0.1:${TEST_REDIS_PORT:-6379}:6379']
+  postgres:
+    ports: ['127.0.0.1:${TEST_POSTGRES_PORT:-5432}:5432']

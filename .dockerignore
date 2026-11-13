@@ -1,0 +1,15 @@
+.git
+.env
+.env.*
+node_modules
+.venv
+__pycache__
+.pytest_cache
+ml/datasets
+ml/artifacts
+.local
+*.sqlite3
+.aws
+.agents
+.codex
+*.db

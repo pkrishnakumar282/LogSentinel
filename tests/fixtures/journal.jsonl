@@ -1,0 +1,2 @@
+{"__CURSOR":"synthetic-cursor-1","__REALTIME_TIMESTAMP":"1767225606000000","PRIORITY":"6","_SYSTEMD_USER_UNIT":"demo-worker.service","_HOSTNAME":"synthetic-host","MESSAGE":"worker heartbeat task=16"}
+{"__CURSOR":"synthetic-cursor-2","__REALTIME_TIMESTAMP":"1767225607000000","PRIORITY":"2","_SYSTEMD_USER_UNIT":"demo-worker.service","_HOSTNAME":"synthetic-host","MESSAGE":"unexpected filesystem corruption on shard 22"}

@@ -1,0 +1,6 @@
+# Resolved numerical and MLflow stack shared with the approved artifact lifecycle.
+-r ../ml-training/requirements-mlflow.txt
+fastapi==0.162.1
+pydantic==2.14.3
+uvicorn==0.54.0
+-r ../../infrastructure/docker/requirements-pipeline.txt

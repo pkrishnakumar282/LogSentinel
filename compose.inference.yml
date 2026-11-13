@@ -1,0 +1,34 @@
+# Combine with docker-compose.yml and compose.mlflow.yml. Registry audit is read-only here.
+services:
+  ml-inference:
+    build:
+      context: .
+      dockerfile: services/ml-inference/Dockerfile
+    restart: unless-stopped
+    networks: [backend]
+    mem_limit: 1g
+    cpus: 1.0
+    security_opt: [no-new-privileges:true]
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_ENABLE_TELEMETRY: 'false'
+      REGISTRY_AUDIT_PATH: /audit/lifecycle.sqlite3
+      MODEL_NAME: ${MODEL_NAME:-logsentinel-model}
+      MODEL_VERSION: ${MODEL_VERSION:-}
+      MODEL_ALIAS: ${MODEL_ALIAS:-champion}
+      INFERENCE_SCOPE: ${INFERENCE_SCOPE:-production}
+      INFERENCE_THRESHOLD: ${INFERENCE_THRESHOLD:-}
+      INFERENCE_API_TOKEN: ${INFERENCE_API_TOKEN:?Set INFERENCE_API_TOKEN to at least 24 random characters}
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:-}
+      INFERENCE_MAX_BATCH: ${INFERENCE_MAX_BATCH:-256}
+      INFERENCE_MAX_CONTEXTS: ${INFERENCE_MAX_CONTEXTS:-32}
+      INFERENCE_MAX_BODY_BYTES: ${INFERENCE_MAX_BODY_BYTES:-1048576}
+      INFERENCE_CONTEXT_TTL_SECONDS: ${INFERENCE_CONTEXT_TTL_SECONDS:-900}
+      INFERENCE_RATE_PER_MINUTE: ${INFERENCE_RATE_PER_MINUTE:-6000}
+    ports: ['127.0.0.1:${INFERENCE_PORT:-8013}:8013']
+    volumes: [registry-audit:/audit:ro]
+    depends_on:
+      mlflow:
+        condition: service_healthy
+volumes:
+  registry-audit:

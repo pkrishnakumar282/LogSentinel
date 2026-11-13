@@ -1,0 +1,15 @@
+{
+  "context_id": "synthetic-demo",
+  "event": {
+    "event_id": "a99cb4d8-cbcb-4ee2-a500-e7a259819242",
+    "timestamp": "2026-01-01T00:00:00Z",
+    "source": "application",
+    "service": "demo-api",
+    "hostname": "synthetic-host",
+    "severity": "INFO",
+    "message": "scheduled task completed in 15 ms",
+    "template": "scheduled task completed in <NUM> ms",
+    "status_code": null,
+    "metadata": {"synthetic": true}
+  }
+}

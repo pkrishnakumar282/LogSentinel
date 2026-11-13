@@ -1,0 +1,2 @@
+2026-01-01T00:00:04Z INFO demo-api - scheduled task completed id=15
+{"timestamp":"2026-01-01T00:00:05Z","level":"ERROR","service":"demo-api","message":"scheduled retry for upstream email=demo@example.test password=fixture-secret","extra_sensitive":"discard-me"}

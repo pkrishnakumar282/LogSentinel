@@ -1,0 +1,1 @@
+2026/01/01 00:00:03 [error] 123#123: *2 upstream timed out, client: 192.0.2.10, server: localhost

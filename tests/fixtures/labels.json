@@ -1,0 +1,9 @@
+{
+  "provenance": "Hand-authored synthetic development fixtures, not production measurements",
+  "evaluation_use": "Controlled behavior tests only; not independent model validation data",
+  "cases": [
+    {"file": "application.txt", "line": 1, "expected_anomaly": false},
+    {"file": "application.txt", "line": 2, "expected_anomaly": false, "reason": "An expected ERROR retry is not automatically anomalous"},
+    {"file": "journal.jsonl", "line": 2, "expected_anomaly": true, "reason": "Controlled unusual corruption scenario"}
+  ]
+}

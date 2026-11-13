@@ -1,0 +1,4 @@
+-r ../../infrastructure/docker/requirements-pipeline.txt
+fastapi==0.162.1
+pydantic==2.14.3
+uvicorn==0.54.0

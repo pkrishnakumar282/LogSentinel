@@ -1,0 +1,32 @@
+# Local secrets and runtime data
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+node_modules/
+dist/
+coverage/
+ml/artifacts/*
+!ml/artifacts/.gitkeep
+ml/datasets/*
+!ml/datasets/README.md
+!ml/datasets/.gitkeep
+*.log
+.DS_Store
+
+# Local collector state and sanitized development output
+.local/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+
+# MLflow local runtime stores
+mlruns/
+mlartifacts/

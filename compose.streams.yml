@@ -1,0 +1,130 @@
+x-pipeline-env: &pipeline-env
+  PIPELINE_DB_BACKEND: postgres
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+  POSTGRES_DB: ${POSTGRES_DB:-logsentinel}
+  POSTGRES_USER: ${POSTGRES_USER:-logsentinel}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
+  NORMALIZED_STREAM: ${NORMALIZED_STREAM:-logs:normalized:v1}
+  PREDICTION_STREAM: ${PREDICTION_STREAM:-logs:predictions:v1}
+  DEAD_LETTER_STREAM: ${DEAD_LETTER_STREAM:-logs:failed:v1}
+  STREAM_MAX_LENGTH: ${STREAM_MAX_LENGTH:-100000}
+  PIPELINE_OUTBOX_MAX_PENDING: ${PIPELINE_OUTBOX_MAX_PENDING:-10000}
+  INFERENCE_CONSUMER_GROUP: ${INFERENCE_CONSUMER_GROUP:-inference-v1}
+  ALERT_CONSUMER_GROUP: ${ALERT_CONSUMER_GROUP:-alerts-v1}
+  CONSUMER_CLAIM_IDLE_MS: ${CONSUMER_CLAIM_IDLE_MS:-60000}
+  CONSUMER_LEASE_MS: ${CONSUMER_LEASE_MS:-30000}
+  CONSUMER_MAX_RETRIES: ${CONSUMER_MAX_RETRIES:-5}
+  CONSUMER_RETRY_SECONDS: ${CONSUMER_RETRY_SECONDS:-1}
+  CONSUMER_MAX_RETRY_SECONDS: ${CONSUMER_MAX_RETRY_SECONDS:-30}
+
+x-worker: &worker
+  restart: unless-stopped
+  networks: [backend]
+  mem_limit: 512m
+  cpus: 1.0
+  security_opt: [no-new-privileges:true]
+  healthcheck:
+    test: [CMD, python, -c, "from shared.pipeline.runtime import healthy; import os; raise SystemExit(0 if healthy(os.environ['WORKER_HEARTBEAT_PATH']) else 1)"]
+    interval: 20s
+    timeout: 5s
+    start_period: 45s
+    retries: 3
+
+services:
+  pipeline-init:
+    build:
+      context: .
+      dockerfile: services/alert-manager/Dockerfile
+    networks: [backend]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    cpus: 1.0
+    restart: 'no'
+    environment: *pipeline-env
+    entrypoint: [python, scripts/manage_pipeline.py]
+    command: [upgrade]
+    healthcheck:
+      disable: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+  inference-worker:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: services/ml-inference/Dockerfile
+    command: [python, -m, ml_inference, worker]
+    mem_limit: 1g
+    environment:
+      <<: *pipeline-env
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_ENABLE_TELEMETRY: 'false'
+      REGISTRY_AUDIT_PATH: /audit/lifecycle.sqlite3
+      MODEL_NAME: ${MODEL_NAME:-logsentinel-model}
+      MODEL_VERSION: ${MODEL_VERSION:-}
+      MODEL_ALIAS: ${MODEL_ALIAS:-champion}
+      INFERENCE_SCOPE: ${INFERENCE_SCOPE:-production}
+      INFERENCE_THRESHOLD: ${INFERENCE_THRESHOLD:-}
+    volumes: [registry-audit:/audit:ro]
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+  alert-manager:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: services/alert-manager/Dockerfile
+    environment:
+      <<: *pipeline-env
+      ALERT_API_TOKEN: ${ALERT_API_TOKEN:?Set ALERT_API_TOKEN to at least 24 random characters}
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:-}
+    ports: ['127.0.0.1:${ALERT_PORT:-8014}:8014']
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8014/health/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+  alert-worker:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: services/alert-manager/Dockerfile
+    command: [worker]
+    environment:
+      <<: *pipeline-env
+      ALERT_GROUP_WINDOW_SECONDS: ${ALERT_GROUP_WINDOW_SECONDS:-300}
+      ALERT_REQUIRE_WARM_CONTEXT: ${ALERT_REQUIRE_WARM_CONTEXT:-true}
+      ALERT_MIN_SCORE: ${ALERT_MIN_SCORE:-}
+      ALERT_HIGH_MARGIN: ${ALERT_HIGH_MARGIN:-0.15}
+      ALERT_CRITICAL_MARGIN: ${ALERT_CRITICAL_MARGIN:-0.30}
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+  outbox-relay:
+    <<: *worker
+    build:
+      context: .
+      dockerfile: services/alert-manager/Dockerfile
+    command: [relay]
+    environment: *pipeline-env
+    depends_on:
+      pipeline-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+volumes:
+  registry-audit:

@@ -1,0 +1,2 @@
+# Host collector uses Python 3.12 standard library only.
+# Local offline sink mode additionally uses the processor package and its Drain3 dependency.

@@ -1,0 +1,6 @@
+# Direct dependency pins; full transitive lock is a Phase 9 deployment gate.
+fastapi==0.162.1
+pydantic==2.14.3
+uvicorn==0.54.0
+drain3==0.9.11
+redis==7.0.1

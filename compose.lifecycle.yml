@@ -1,0 +1,28 @@
+# Combine with docker-compose.yml and compose.mlflow.yml for on-demand tracked jobs.
+services:
+  ml-lifecycle:
+    profiles: [lifecycle]
+    build:
+      context: .
+      dockerfile: infrastructure/docker/training-mlflow.Dockerfile
+    restart: 'no'
+    networks: [backend]
+    mem_limit: 2g
+    cpus: 2.0
+    security_opt: [no-new-privileges:true]
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT_NAME: ${MLFLOW_EXPERIMENT_NAME:-LogSentinel}
+      REGISTRY_AUDIT_PATH: /audit/lifecycle.sqlite3
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:-}
+    volumes:
+      - ./ml/datasets:/data:ro
+      - training-artifacts:/artifacts
+      - registry-audit:/audit
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    command: [--help]
+volumes:
+  training-artifacts:
+  registry-audit:
