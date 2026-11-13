@@ -54,4 +54,9 @@ unapproved. See [Phase 6 validation](phase6-validation.md). Phase 7 implements t
 SQL-backed dashboard/log/source queries, bounded gateway proxies, real MLflow metadata,
 durable asynchronous training jobs, lifecycle audit import and conservative retention.
 Validation and environment limitations are recorded in [Phase 7 validation](phase7-validation.md).
-Phase 8 awaits approval.
+Phase 8 implements all eight responsive dashboard pages against the versioned gateway,
+including log/anomaly exploration, audited alert actions, model/job management, experiments,
+sources and system status. `npm ci`, the component suite (3 tests), strict TypeScript check
+and production build pass. The app uses route-level splitting; a live full-stack browser run
+remains for integration phases. See [Phase 8 validation](phase8-validation.md).
+Phase 9 awaits approval.

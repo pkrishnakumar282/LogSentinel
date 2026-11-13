@@ -59,9 +59,19 @@ def run_one(jobs, root, timeout=3600, runner=None):
                 if process.returncode:
                     raise RuntimeError('training_process_failed')
             outcome = json.loads(output)
-        # Artifact paths are internal; model remains a candidate regardless of training success.
-        jobs.finish(job, result={'dataset_version': outcome['dataset_version'],
-                                'approval_status': 'candidate_not_approved', 'tracking_run_id': outcome.get('tracking_run_id')})
+        artifact_root = Path(outcome['artifact_directory'])
+        report_files = list(artifact_root.glob('*/report.json'))
+        report = json.loads(report_files[0].read_text()) if len(report_files) == 1 else {}
+        candidates = [{'variant':item.get('variant'),'algorithm':item.get('algorithm'),
+            'n_estimators':item.get('n_estimators'),'threshold':item.get('threshold'),
+            'holdout_predicted_anomaly_fraction':item.get('holdout_predicted_anomaly_fraction'),
+            'fit_seconds':item.get('fit_seconds'),'holdout_predict_ms_per_event':item.get('holdout_predict_ms_per_event'),
+            'feature_count':item.get('feature_count')} for item in report.get('candidates',[])]
+        # Artifact paths are internal; these are unsupervised diagnostics, not accuracy metrics.
+        result={'dataset_version':outcome['dataset_version'],'approval_status':'candidate_not_approved',
+                'tracking_run_id':outcome.get('tracking_run_id'),'training_duration_seconds':report.get('duration_seconds'),
+                'candidates':candidates}
+        jobs.finish(job,result=result)
     except TimeoutError:
         jobs.finish(job, failure='training_timeout')
     except Exception:

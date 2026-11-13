@@ -4,7 +4,7 @@ Intelligent multi-source log anomaly detection and monitoring platform for local
 DevOps and SRE workflows. The intended platform collects Linux, Nginx and Python application
 logs, learns normal patterns, and connects anomaly detection to investigation and alerting.
 
-**Current status: Phase 7 application database and API gateway implemented.**
+**Current status: Phase 8 React monitoring dashboard implemented.**
 Ingestion, training, evaluation, approved-version inference, durable prediction checkpoints,
 transactional outbox, Redis consumer adapters and grouped alerts with audited actions are
 implemented. PostgreSQL is the worker default; SQLite is an explicit development backend.
@@ -17,7 +17,7 @@ no successful production detection performance or fake alerts are claimed.
 The gateway now exposes SQL-backed logs, dashboard statistics, source provenance, MLflow
 metadata, alert actions and a persisted asynchronous training queue. An independent archive
 consumer stores logs without an approved model. Retention is explicit and preserves stream
-recovery history. Frontend, full integration deployment, monitoring and CI remain scheduled.
+recovery history. The responsive React dashboard now covers all eight operational pages and reads the gateway APIs. Full container integration, Prometheus/Grafana and CI remain scheduled.
 
 Use this repository root directly; an extra `logsentinel-ai/` nesting level is unnecessary.
 
@@ -35,12 +35,14 @@ Use this repository root directly; an extra `logsentinel-ai/` nesting level is u
 - [Executed Phase 6 validation](docs/phase6-validation.md)
 - [Phase 7 database, gateway, jobs and retention](docs/gateway-and-database.md)
 - [Executed Phase 7 validation](docs/phase7-validation.md)
+- [Frontend dashboard and local setup](docs/frontend.md)
+- [Executed Phase 8 validation](docs/phase8-validation.md)
 - [Dataset provenance policy](ml/datasets/README.md)
 
-The planned stack is React/TypeScript/Vite/Tailwind/Recharts, FastAPI/Pydantic/SQLAlchemy,
-PostgreSQL, Redis Streams, Drain3, scikit-learn, MLflow, Docker, Prometheus and Grafana.
-Separate services own ingestion, normalization, training, inference, alerting and the API.
-See the architecture document for the diagram and ownership table.
+The stack uses React/TypeScript/Vite/Tailwind/Recharts, FastAPI/Pydantic/SQLAlchemy,
+PostgreSQL, Redis Streams, scikit-learn, MLflow and Docker. Separate services own ingestion,
+normalization, training, inference, alerting and the API. See the architecture document for
+the diagram and ownership table.
 
 ## Start the Phase 1 infrastructure
 
@@ -91,10 +93,9 @@ Inference loads the fitted pipeline without refitting and records the numeric re
 version and uncalibrated score with every prediction. Synthetic development
 fixtures will be explicitly identified. No accuracy claims will be made for unlabeled data.
 
-The frontend will provide overview, logs, anomalies, alerts, models, experiments, sources
-and system monitoring pages, all backed by gateway APIs under `/api/v1/`. API examples,
-OpenAPI access, frontend setup/screenshots and model registration commands will be documented
-as their implementations become executable. Training commands are available now in
+The frontend provides overview, logs, anomalies, alerts, models, experiments, sources
+and system monitoring pages backed by gateway APIs under `/api/v1/`. See the
+[dashboard guide](docs/frontend.md) for setup and API behavior. Training commands are available now in
 [the training guide](docs/training.md); HTTP prediction is implemented in
 [the inference guide](docs/inference.md). The processor
 ingestion API and request examples are in [the ingestion guide](docs/ingestion.md).

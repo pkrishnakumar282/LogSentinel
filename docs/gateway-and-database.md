@@ -212,3 +212,9 @@ latency series and Prometheus scraping are still Phase 10. No fake metrics subst
 Implementation references: [SQLAlchemy correlated subqueries](https://docs.sqlalchemy.org/en/20/tutorial/data_select.html),
 [FastAPI CORS](https://fastapi.tiangolo.com/tutorial/cors/) and
 [HTTPX timeout controls](https://www.python-httpx.org/advanced/timeouts/).
+
+## Phase 8 frontend
+
+For Phase 8 React dashboard setup, pages, access settings and validation, see the
+[frontend guide](frontend.md) and [validation record](phase8-validation.md). The UI reads the
+versioned APIs described above. Compose static serving remains in Phase 9.

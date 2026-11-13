@@ -1,0 +1,14 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    networks: [backend]
+    ports: ['127.0.0.1:${FRONTEND_PORT:-5173}:8080']
+    mem_limit: 128m
+    cpus: 0.5
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      api-gateway:
+        condition: service_started
