@@ -1,3 +1,5 @@
+import { SignalBanner } from '../components/DesignEffects';
+import { chartTheme, chartColors } from '../theme';
 import { Activity, AlertOctagon, AlertTriangle, Boxes, Cpu, HardDrive, ShieldCheck } from 'lucide-react';
 import { useMemo } from 'react';
 import { Area, AreaChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -7,8 +9,8 @@ import type { Dashboard, ModelHealth } from '../types';
 import { LogTable } from '../components/LogTable';
 import { Card, LoadState, PageTitle, RefreshButton, StatCard, StatusPill } from '../components/ui';
 
-const COLORS = ['#4aa3ff', '#a78bfa', '#f4b942', '#f66c78', '#46c99b', '#7c8da8'];
-const tooltipStyle = { background: '#141b25', border: '1px solid #2a3543', borderRadius: 9, color: '#eaf0f7' };
+const COLORS = chartColors;
+const tooltipStyle = chartTheme.tooltip;
 
 export function Overview() {
   const { data, error, loading, refresh, updatedAt } = useGatewayData<Dashboard>('/dashboard?hours=24', { refreshMs: 30_000 });
@@ -30,6 +32,7 @@ export function Overview() {
   return <>
     <PageTitle eyebrow={new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }).toUpperCase()} title="Operations overview" description="A live view of your log pipeline and anomaly activity."
       actions={<><span className="refresh-label">Updated {updatedAt?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) ?? '—'}</span><RefreshButton onClick={() => void refresh()} loading={loading} /></>} />
+    <SignalBanner />
     <LoadState loading={loading && !data} error={!data ? error : null} onRetry={() => void refresh()} />
     {data && <>
       <div className="stats-grid">
@@ -41,8 +44,8 @@ export function Overview() {
       <div className="overview-grid charts-row">
         <Card title="Log volume & anomalies" subtitle="Event time · last 24 hours" className="chart-card">
           {hasChart ? <ResponsiveContainer width="100%" height={250}><AreaChart data={timeline} margin={{ top: 10, right: 10, bottom: 0, left: -18 }}>
-            <defs><linearGradient id="normalFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4aa3ff" stopOpacity={0.2} /><stop offset="100%" stopColor="#4aa3ff" stopOpacity={0} /></linearGradient><linearGradient id="anomalyFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f66c78" stopOpacity={0.28} /><stop offset="100%" stopColor="#f66c78" stopOpacity={0} /></linearGradient></defs>
-            <CartesianGrid stroke="#202a36" strokeDasharray="4 5" vertical={false} /><XAxis dataKey="time" tick={{ fill: '#768499', fontSize: 11 }} tickLine={false} axisLine={false} minTickGap={32} /><YAxis tick={{ fill: '#768499', fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} /><Tooltip contentStyle={tooltipStyle} /><Area type="monotone" dataKey="normal" name="Normal" stroke="#4aa3ff" fill="url(#normalFill)" strokeWidth={2} /><Area type="monotone" dataKey="anomaly" name="Anomalies" stroke="#f66c78" fill="url(#anomalyFill)" strokeWidth={2} /><Area type="monotone" dataKey="unscored" name="Unscored" stroke="#7d8ca0" fill="transparent" strokeWidth={1.5} strokeDasharray="4 4" />
+            <defs><linearGradient id="normalFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={chartTheme.normal} stopOpacity={0.2} /><stop offset="100%" stopColor={chartTheme.normal} stopOpacity={0} /></linearGradient><linearGradient id="anomalyFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={chartTheme.anomaly} stopOpacity={0.28} /><stop offset="100%" stopColor={chartTheme.anomaly} stopOpacity={0} /></linearGradient></defs>
+            <CartesianGrid stroke={chartTheme.grid} strokeDasharray="4 5" vertical={false} /><XAxis dataKey="time" tick={{ fill: chartTheme.tick, fontSize: 11 }} tickLine={false} axisLine={false} minTickGap={32} /><YAxis tick={{ fill: chartTheme.tick, fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} /><Tooltip contentStyle={tooltipStyle} /><Area type="monotone" dataKey="normal" name="Normal" stroke={chartTheme.normal} fill="url(#normalFill)" strokeWidth={2} /><Area type="monotone" dataKey="anomaly" name="Anomalies" stroke={chartTheme.anomaly} fill="url(#anomalyFill)" strokeWidth={2} /><Area type="monotone" dataKey="unscored" name="Unscored" stroke={chartTheme.unscored} fill="transparent" strokeWidth={1.5} strokeDasharray="4 4" />
           </AreaChart></ResponsiveContainer> : <div className="chart-empty">No persisted events in the selected time range.</div>}
           <div className="chart-legend"><span><i className="legend-blue" />Normal</span><span><i className="legend-red" />Anomaly</span><span><i className="legend-gray" />Unscored</span></div>
         </Card>

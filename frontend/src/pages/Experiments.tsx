@@ -1,3 +1,4 @@
+import { chartTheme } from '../theme';
 import { useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useGatewayData } from '../hooks';
@@ -5,7 +6,7 @@ import type { Experiment } from '../types';
 import { formatTime } from '../components/LogTable';
 import { Card, LoadState, PageTitle, RefreshButton, StatusPill } from '../components/ui';
 
-const tooltipStyle = { background: '#141b25', border: '1px solid #2a3543', borderRadius: 9, color: '#eaf0f7' };
+const tooltipStyle = chartTheme.tooltip;
 export function Experiments() {
   const { data, error, loading, refresh } = useGatewayData<{ items: Experiment[] }>('/experiments', { refreshMs: 45_000 });
   const [selected, setSelected] = useState('');
@@ -22,7 +23,7 @@ export function Experiments() {
       <div className="experiment-summary"><div><span>Experiments</span><strong>{experiments.length}</strong></div><div><span>Visible runs</span><strong>{experiments.reduce((sum, experiment) => sum + experiment.runs.length, 0)}</strong></div><div><span>Latest run</span><strong>{latest ? formatTime(new Date(latest).toISOString()) : '—'}</strong></div><div><span>Showing</span><select aria-label="Select experiment" value={active?.id ?? ''} onChange={(event) => setSelected(event.target.value)}>{experiments.map((experiment) => <option key={experiment.id} value={experiment.id}>{experiment.name}</option>)}</select></div></div>
       <div className="experiment-grid">
         <Card title="Run comparison" subtitle="Only independently labeled metrics are charted. Unlabeled runs have no fabricated accuracy scores." className="experiment-chart-card">
-          {f1Comparison.length ? <ResponsiveContainer width="100%" height={285}><BarChart data={f1Comparison} margin={{ top: 8, right: 12, bottom: 28, left: -16 }}><CartesianGrid stroke="#202a36" strokeDasharray="4 5" vertical={false} /><XAxis dataKey="name" tick={{ fill: '#8593a5', fontSize: 10 }} tickLine={false} axisLine={false} angle={-15} textAnchor="end" interval={0} /><YAxis tick={{ fill: '#8593a5', fontSize: 11 }} tickLine={false} axisLine={false} domain={[0, 1]} /><Tooltip contentStyle={tooltipStyle} /><Bar dataKey="f1" name="F1" fill="#55a6ff" radius={[4, 4, 0, 0]} /><Bar dataKey="precision" name="Precision" fill="#43c99b" radius={[4, 4, 0, 0]} /><Bar dataKey="recall" name="Recall" fill="#af8aff" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer> : <div className="chart-empty">This experiment has no labeled precision, recall or F1 metrics. Training runs use unlabeled diagnostics.</div>}
+          {f1Comparison.length ? <ResponsiveContainer width="100%" height={285}><BarChart data={f1Comparison} margin={{ top: 8, right: 12, bottom: 28, left: -16 }}><CartesianGrid stroke={chartTheme.grid} strokeDasharray="4 5" vertical={false} /><XAxis dataKey="name" tick={{ fill: chartTheme.tick, fontSize: 10 }} tickLine={false} axisLine={false} angle={-15} textAnchor="end" interval={0} /><YAxis tick={{ fill: chartTheme.tick, fontSize: 11 }} tickLine={false} axisLine={false} domain={[0, 1]} /><Tooltip contentStyle={tooltipStyle} /><Bar dataKey="f1" name="F1" fill="#ff9b91" radius={[4, 4, 0, 0]} /><Bar dataKey="precision" name="Precision" fill="#43c99b" radius={[4, 4, 0, 0]} /><Bar dataKey="recall" name="Recall" fill="#c4abff" radius={[4, 4, 0, 0]} /></BarChart></ResponsiveContainer> : <div className="chart-empty">This experiment has no labeled precision, recall or F1 metrics. Training runs use unlabeled diagnostics.</div>}
         </Card>
         <Card title="Selected experiment" subtitle={active?.name ?? 'MLflow tracking metadata'}>
           <div className="experiment-meta"><span>Experiment ID</span><code>{active?.id}</code><span>Visible history</span><strong>Latest {runs.length} runs · max 100</strong><span>Run statuses</span><div className="status-counts">{['FINISHED', 'RUNNING', 'FAILED'].map((status) => <span key={status}>{status} <b>{runs.filter((run) => run.status === status).length}</b></span>)}</div></div>

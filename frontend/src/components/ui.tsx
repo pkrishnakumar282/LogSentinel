@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from 'react';
+import { moveSpotlight } from './DesignEffects';
 import { AlertCircle, ArrowDownRight, ArrowUpRight, Check, Clock3, LoaderCircle, RefreshCw } from 'lucide-react';
 
 export function PageTitle({ eyebrow, title, description, actions }: {
@@ -13,7 +14,7 @@ export function PageTitle({ eyebrow, title, description, actions }: {
 export function Card({ title, subtitle, action, className = '', children }: {
   title?: string; subtitle?: string; action?: ReactNode; className?: string; children: ReactNode;
 }) {
-  return <section className={`card ${className}`}>
+  return <section className={`card spotlight-card ${className}`} onPointerMove={moveSpotlight}>
     {(title || action) && <div className="card-heading"><div>{title && <h2>{title}</h2>}{subtitle && <p>{subtitle}</p>}</div>{action}</div>}
     {children}
   </section>;
@@ -23,7 +24,7 @@ export function StatCard({ label, value, note, icon: Icon, tone = 'blue', delta 
   label: string; value: string | number; note?: string; icon: ComponentType<{ size?: number }>;
   tone?: 'blue' | 'green' | 'amber' | 'red' | 'violet'; delta?: string;
 }) {
-  return <article className="stat-card">
+  return <article className={`stat-card spotlight-card stat-${tone}`} onPointerMove={moveSpotlight}>
     <div className="stat-top"><span>{label}</span><span className={`icon-tile ${tone}`}><Icon size={18} /></span></div>
     <div className="stat-value">{value}</div>
     <div className="stat-note">{delta ? <span className="delta"><ArrowUpRight size={14} />{delta}</span> : null}{note}</div>

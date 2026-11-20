@@ -1,3 +1,4 @@
+import { chartTheme } from '../theme';
 import { useMemo } from 'react';
 import { Activity, Clock3, Database, Globe2, Server, Shield } from 'lucide-react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
@@ -6,7 +7,7 @@ import type { SourceRow } from '../types';
 import { formatTime } from '../components/LogTable';
 import { Card, LoadState, PageTitle, RefreshButton, StatusPill } from '../components/ui';
 
-const colors: Record<string, string> = { linux: '#4aa3ff', nginx: '#47c99b', application: '#b28aff' };
+const colors: Record<string, string> = { linux: '#ff9b91', nginx: '#47c99b', application: '#c4abff' };
 export function Sources() {
   const { data, error, loading, refresh, updatedAt } = useGatewayData<{ items: SourceRow[] }>('/sources', { refreshMs: 30_000 });
   const sources = data?.items ?? [];
@@ -23,7 +24,7 @@ export function Sources() {
     <LoadState loading={loading && !data} error={!data ? error : null} empty={Boolean(data && sources.length === 0)} emptyTitle="No source records yet" emptyText="The source inventory fills after log events pass through the archive worker." onRetry={() => void refresh()} />
     {data && sources.length > 0 && <div className="source-page-grid">
       <Card title="Ingestion by source" subtitle="Counts of stored canonical events">
-        <div className="source-chart-wrap source-page-pie"><ResponsiveContainer width="100%" height={225}><PieChart><Pie data={stats} dataKey="count" nameKey="name" innerRadius={64} outerRadius={91} paddingAngle={4} stroke="none">{stats.map((entry) => <Cell key={entry.name} fill={colors[entry.name] ?? '#74839a'} />)}</Pie><Tooltip contentStyle={{ background: '#141b25', border: '1px solid #2a3543', borderRadius: 9, color: '#eaf0f7' }} /></PieChart></ResponsiveContainer><div className="source-chart-center"><strong>{total.toLocaleString()}</strong><span>records</span></div></div>
+        <div className="source-chart-wrap source-page-pie"><ResponsiveContainer width="100%" height={225}><PieChart><Pie data={stats} dataKey="count" nameKey="name" innerRadius={64} outerRadius={91} paddingAngle={4} stroke="none">{stats.map((entry) => <Cell key={entry.name} fill={colors[entry.name] ?? '#74839a'} />)}</Pie><Tooltip contentStyle={chartTheme.tooltip} /></PieChart></ResponsiveContainer><div className="source-chart-center"><strong>{total.toLocaleString()}</strong><span>records</span></div></div>
         <div className="source-legend">{stats.map((source) => <div key={source.name}><span><i style={{ background: colors[source.name] ?? '#74839a' }} />{source.name}</span><b>{source.count.toLocaleString()}</b></div>)}</div>
       </Card>
       <Card title="Source hosts" subtitle="Last receipt indicates stored activity, not collector connectivity" className="source-hosts-card">
